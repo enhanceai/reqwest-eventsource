@@ -65,11 +65,16 @@ pub struct EventSource {
 
 impl EventSource {
     /// Wrap a [`RequestBuilder`]
-    pub fn new(builder: RequestBuilder) -> Result<Self, CannotCloneRequestError> {
-        let builder = builder.header(
-            reqwest::header::ACCEPT,
-            HeaderValue::from_static("text/event-stream"),
-        );
+    pub fn new(builder: RequestBuilder, attach_header: bool) -> Result<Self, CannotCloneRequestError> {
+        let builder = if attach_header {
+            builder.header(
+                reqwest::header::ACCEPT,
+                HeaderValue::from_static("text/event-stream"),
+            )
+        } else {
+            builder
+        };
+
         let res_future = Box::pin(builder.try_clone().ok_or(CannotCloneRequestError)?.send());
         Ok(Self {
             builder,
@@ -82,12 +87,7 @@ impl EventSource {
             last_retry: None,
         })
     }
-
-    /// Create a simple EventSource based on a GET request
-    pub fn get<T: IntoUrl>(url: T) -> Self {
-        Self::new(reqwest::Client::new().get(url)).unwrap()
-    }
-
+    
     /// Close the EventSource stream and stop trying to reconnect
     pub fn close(&mut self) {
         self.is_closed = true;

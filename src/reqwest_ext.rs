@@ -5,11 +5,11 @@ use reqwest::RequestBuilder;
 /// Provides an easy interface to build an [`EventSource`] from a [`RequestBuilder`]
 pub trait RequestBuilderExt {
     /// Create a new [`EventSource`] from a [`RequestBuilder`]
-    fn eventsource(self) -> Result<EventSource, CannotCloneRequestError>;
+    fn eventsource(self, attach_header: bool) -> Result<EventSource, CannotCloneRequestError>;
 }
 
 impl RequestBuilderExt for RequestBuilder {
-    fn eventsource(self) -> Result<EventSource, CannotCloneRequestError> {
-        EventSource::new(self)
+    fn eventsource(self, attach_header: bool) -> Result<EventSource, CannotCloneRequestError> {
+        EventSource::new(self, attach_header)
     }
 }
